@@ -8,10 +8,12 @@
 import SwiftUI
 
 struct ContentView: View {
-    @StateObject private var locationManager = LocationManager.shared
+    @StateObject private var locationManager = appSingletons.locationManager
+    @StateObject private var longTaskManager = appSingletons.longTaskManager
     
     var body: some View {
         VStack(spacing: 20) {
+            Text("LongTask is \(longTaskManager.isTaskDone ? "done" : "running...")")
             if let location = locationManager.currentLocation {
                 Text("Latitude: \(location.latitude)")
                 Text("Longitude: \(location.longitude)")
@@ -39,6 +41,12 @@ struct ContentView: View {
         }
         .onAppear {
             locationManager.checkAuthorization()
+            
+            
+            Task {
+              await longTaskManager.doLongTask()
+            }
+            
         }
         .padding()
     }

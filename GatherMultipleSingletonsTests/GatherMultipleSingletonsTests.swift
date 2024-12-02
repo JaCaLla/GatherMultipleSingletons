@@ -10,8 +10,23 @@ import Testing
 
 struct GatherMultipleSingletonsTests {
 
-    @Test func example() async throws {
-        // Write your test here and use APIs like `#expect(...)` to check expected conditions.
+    @Test @MainActor func example() async throws {
+        let longTaskManagerMock = LongTaskManagerMock()
+        appSingletons = AppSingletons(longTaskManager: longTaskManagerMock)
+        #expect(appSingletons.longTaskManager.isTaskDone == false)
+        await appSingletons.longTaskManager.doLongTask()
+        #expect(appSingletons.longTaskManager.isTaskDone == true)
     }
 
 }
+
+final class LongTaskManagerMock: LongTaskManager {
+    
+    override func doLongTask() async {
+        await MainActor.run {
+            isTaskDone = true
+        }
+    }
+}
+
+
